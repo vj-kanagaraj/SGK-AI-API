@@ -1,24 +1,24 @@
 #Constants
 # laser_base_directory = r"/home/vijay/pretrained_models/"
-path_to_bpe_codes = r"/home/vijay/pretrained_models/Laser/93langs.fcodes"
-path_to_bpe_vocab = r"/home/vijay/pretrained_models/Laser/93langs.fvocab"
-path_to_encoder = r"/home/vijay/pretrained_models/Laser/bilstm.93langs.2018-12-26.pt"
+path_to_bpe_codes = r"/data/Laser/93langs.fcodes"
+path_to_bpe_vocab = r"/data/Laser/93langs.fvocab"
+path_to_encoder = r"/data/Laser/bilstm.93langs.2018-12-26.pt"
 document_location = r"/home/vijay/doc_extractor/model_dataset/"
 
 #LaBSE Model
 labse_location = r""
 
 #language model
-whatlangid_model = r'/home/vijay/pretrained_models/whatlangid/lid.176.ftz'
+whatlangid_model = r'/data/Whatlangid/lid.176.ftz'
 
 # General
-input_excel = r"/home/vijay/doc_extractor/model_dataset/dataset.xlsx"
-model_location = r"/home/vijay/doc_extractor/model_dataset/model.pkl"
+input_excel = r"/data/trained_models/dataset.xlsx"
+model_location = r"/data/trained_models/model.pkl"
 
 #MSD Project
-msd_input_excel = r"/home/vijay/doc_extractor/model_dataset/MSD_dataset.xlsx"
-msd_model_location = r"/home/vijay/doc_extractor/model_dataset/model_msd.pkl"
-msd_content_model_location = r"/home/vijay/doc_extractor/model_dataset/model_msd_content.pkl"
+msd_input_excel = r"/data/trained_models/MSD_dataset.xlsx"
+msd_model_location = r"/data/trained_models/model_msd_header.pkl"
+msd_content_model_location = r"/data/trained_models/model_msd_content.pkl"
 
 # creds for SMB share
 smb_username = 'weblogic'
