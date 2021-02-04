@@ -1,7 +1,0 @@
-environment.py
-local_constants.py
-local_settings.py
-assets
-.sqlite
-.xml
-.iml
