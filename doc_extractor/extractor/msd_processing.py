@@ -8,6 +8,7 @@ class msd_extraction(base):
         super().__init__()
         self.file_name = None
         self.regex_heading_msd = r"^\d+\.\d?[\-\s]|\<li\>"
+        self.final = None
         self.validation_categories = {
                                       'warning':['warning'],
                                       'storage_instructions':['storage_instructions'],
@@ -160,10 +161,10 @@ class msd_extraction(base):
                         except:
                             pass
 
-    def validation(self,final):
+    def validation(self):
         for category , cate_value in self.validation_categories.items():
-            if category in final:
-                for index,value in enumerate(final[category]):
+            if category in self.final:
+                for index,value in enumerate(self.final[category]):
                     for lang_key, val in value.items():
                         # output = base('msd_content',msd_content_model_location).prediction(val,method='labse')
                         output = base('msd_content',msd_content_model_location).prediction(val)
@@ -180,19 +181,17 @@ class msd_extraction(base):
                             if pred == 'None':
                                 pass
                             elif pred != 'None' and probability > 0.70:
-                                final[category].pop(index)
-                                if pred in final:
-                                    final[pred].append({lang_key:val})
+                                self.final[category].pop(index)
+                                if pred in self.final:
+                                    self.final[pred].append({lang_key:val})
                                 else:
-                                    final[pred] = [{lang_key:val}]
+                                    self.final[pred] = [{lang_key:val}]
                             else:
                                 pass
                                 # final[category].pop(index)
                             print('fail')
-                    if not final[category]:
-                        final.pop(category)
-        # return final
-
+                    if not self.final[category]:
+                        self.final.pop(category)
 
     def main(self,file_name):
         final = {}
@@ -231,11 +230,13 @@ class msd_extraction(base):
                         final[prediction] = [{lang: para}]
         if 'None' in final:
             final.pop('None', None)
-        final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
-        print('before validation',final)
-        self.validation(final)
-        print('after validation',final)
-        return final
+        # self.final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
+        self.final = final
+        print('before validation',self.final)
+        self.validation()
+        self.final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **self.final}
+        print('after validation',self.final)
+        return self.final
     # def main2(self,file_name):                      # group by language
     #     final = {}
     #     all_lang = set()
