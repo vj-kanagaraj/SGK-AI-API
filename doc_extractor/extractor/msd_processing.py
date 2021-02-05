@@ -138,7 +138,7 @@ class msd_extraction(base):
                         try:
                             content = BeautifulSoup(str(content), 'html.parser')
                             for para in content.find_all('p'):
-                                # print('para----yyyyyyyyy', para)
+                                print('para----yyyyyyyyy', para)
                                 para = str(para)
                                 para = para.replace('<strong>', '<b>').replace('</strong>', '</b>')
                                 para = re.sub(r"<(\/?[^/bems]).*?>", '', para)
@@ -154,7 +154,7 @@ class msd_extraction(base):
                             content = BeautifulSoup(str(content),'html.parser')
                             for para in content.find_all('p'):
                                 para = str(para)
-                                # print('para----xxxxxxx',para)
+                                print('para----xxxxxxx',para)
                                 para = para.replace('<strong>', '<b>').replace('</strong>', '</b>')
                                 para = re.sub(r"<(\/?[^/bems]).*?>", '', para)
                                 tmp.append(para)
@@ -162,6 +162,7 @@ class msd_extraction(base):
                             pass
 
     def validation(self):
+        print('inside validation')
         for category , cate_value in self.validation_categories.items():
             if category in self.final:
                 for index,value in enumerate(self.final[category]):
@@ -228,6 +229,7 @@ class msd_extraction(base):
                         final[prediction].append({lang: para})
                     else:
                         final[prediction] = [{lang: para}]
+        print('final---->',final)
         if 'None' in final:
             final.pop('None', None)
         # self.final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
