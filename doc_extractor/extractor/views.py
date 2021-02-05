@@ -13,9 +13,9 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 # from .excel_processing import *
 from .msd_processing import *
 
-@api_view()
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
+# @api_view()
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([TokenAuthentication])
 def msd(request):
     final_json = {}
     # getting value from query string
