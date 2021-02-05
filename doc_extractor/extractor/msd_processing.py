@@ -306,6 +306,7 @@ class msd_extraction(base):
             final.pop('None', None)
         final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
         self.validation(final)
+        print(final)
         return final
 
     # def main_old(self,file_name):
