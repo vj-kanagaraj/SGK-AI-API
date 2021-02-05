@@ -16,11 +16,11 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-print('project_dir',PROJECT_DIR)
+# print('project_dir',PROJECT_DIR)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doc_extractor.settings")
 
-print("base dir path", BASE_DIR)
+# print("base dir path", BASE_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -79,15 +79,15 @@ WSGI_APPLICATION = 'doc_extractor.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'ai',
-        'CLIENT': {
-                'host': '172.28.42.150:27017',
-            },
-    },
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'NAME': 'ai',
+#         'CLIENT': {
+#                 'host': '172.28.42.150:27017',
+#             },
+#     },
+# }
 
 
 # Password validation
@@ -153,8 +153,6 @@ USE_TZ = True
 
 # STATICFILES_DIRS = [
 #     os.path.join(BASE_DIR, "/assets/"),
-#     # "C:\\nazeer\\ai\\socket\\realtime_chat\\static",
-#     #"C:\\Users\\SAM - Python\\PycharmProjects\\socket_may_15\\realtime_chat\\static",
 #     r"/Users/VIJAYKANAGARAJ/PycharmProjects/Schawk/doc_extractor/assets/",
 # ]
 #

@@ -13,7 +13,9 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 # from .excel_processing import *
 from .msd_processing import *
 
-
+@api_view()
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 def msd(request):
     final_json = {}
     # getting value from query string
@@ -30,20 +32,48 @@ def msd(request):
             output = msd_extraction().main(file_name)
             final_json[file_index] = output
         else:
-            final_json[file_index] = {'status':0}
+            final_json[file_index] = {'status':0,'comment':'file type not supported'}
     return JsonResponse(final_json)
 
+# def dataset_to_mangodb(request):
+#     from pymongo import MongoClient
+#     client = MongoClient('172.28.42.150',27017)
+#     db = client['dataset']
+#     collection = db['msd_content']
+#     data = [msd_content(category=i['category'], text=i['text'], language_code=i['language_code'],
+#                         language=i['language'],
+#                         category_actual=i['category_actual'],
+#                         type=i['type']) for i in collection.find({})]
+#     if data:
+#         msd_content.objects.bulk_create(data)
+#         return HttpResponse('success')
+#     else:
+#         return HttpResponse('Failure')
+
 def dataset_to_mangodb(request):
+    method = request.GET.get('method','fail')
+    migration = request.GET.get('mode','fail')
     from pymongo import MongoClient
     client = MongoClient('172.28.42.150',27017)
-    db = client['dataset']
-    collection = db['msd_content']
-    data = [msd_content(category=i['category'], text=i['text'], language_code=i['language_code'],
-                        language=i['language'],
-                        category_actual=i['category_actual'],
-                        type=i['type']) for i in collection.find({})]
-    if data:
-        msd_content.objects.bulk_create(data)
-        return HttpResponse('success')
+    db = client['ai']
+    if method == 'header' and migration == 'dev_to_prod':
+        collection = db['extractor_msd_dataset']
+        data = [msd_content(category=i['category'], text=i['text'], language_code=i['language_code'],
+                            language=i['language'],
+                            type=i['type']) for i in collection.find({})]
+        if data:
+            msd_dataset.objects.all().delete()
+            msd_dataset.objects.bulk_create(data)
+            return HttpResponse('success')
+    elif method == 'content' and migration == 'dev_to_prod':
+        collection = db['extractor_msd_content']
+        data = [msd_content(category=i['category'], text=i['text'], language_code=i['language_code'],
+                            language=i['language'],
+                            category_actual=i['category_actual'],
+                            type=i['type']) for i in collection.find({})]
+        if data:
+            msd_content.objects.all().delete()
+            msd_content.objects.bulk_create(data)
+            return HttpResponse('success')
     else:
         return HttpResponse('Failure')
