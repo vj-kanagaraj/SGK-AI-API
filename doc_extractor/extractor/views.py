@@ -27,6 +27,7 @@ def msd(request):
     else:
         pass
     for file_index , file_name in enumerate(file_name_list):
+        print(f'{file_index}----->{file_name}')
         doc_format = os.path.splitext(file_name)[1].lower()
         if doc_format == '.docx':
             output = msd_extraction().main(file_name)

@@ -64,58 +64,58 @@ class msd_extraction(base):
                 # print('para------>',para)
                 yield para
 
-    def heading_value_extraction(self,file_name):                       # only for MSD
-        tmp = []
-        final = {}
-        key = ''
-        generator = self.text_from_html(file_name)
-        paragraphs = [component for component in generator]
-        for i, content in enumerate(paragraphs):
-            text = str(content)
-            if '' in tmp:
-                tmp.remove('')
-            if re.findall(self.regex_heading_msd, content.text.strip()) or '<li>' in text:
-            # if re.findall(self.regex_heading_msd, text):
-            #     print(text, '----------super')
-                try:
-                    if key and (key not in final):
-                        if tmp:
-                            # final[key] = ['$$'.join(tmp)]
-                            yield key , ['$$'.join(tmp)]
-                    elif key in final:
-                        if tmp:
-                            # final[key].append('$$'.join(tmp))
-                            yield key ,['$$'.join(tmp)]
-                    key = re.sub(r'<.*?>', '', text)
-                    # print(key)
-                    tmp.clear()
-                except:
-                    pass
-            else:
-                if i == len(paragraphs) - 1:
-                    text = text.strip()
-                    tmp = [t for t in tmp if t]
-                    if text and not re.findall(r"Panel\s\d", text):
-                        text = text.replace('<strong>', '<b>').replace('</strong>', '</b>')
-                        text = re.sub(r"<(\/?[^/bems]).*?>", '', text)
-                        tmp.append(text)
-                    if key not in final:
-                        if tmp:
-                            # final[key] = ['$$'.join(tmp)]
-                            yield key, ['$$'.join(tmp)]
-                    elif key in final:
-                        if tmp:
-                            # final[key].append('$$'.join(tmp))
-                            yield key, ['$$'.join(tmp)]
-                    else:
-                        pass
-                else:
-                    text = text.strip()
-                    tmp = [t for t in tmp if t]
-                    if text and not re.findall(r"Panel\s\d", text):  # filter out heading like 'big panel 1'
-                        text = text.replace('<strong>', '<b>').replace('</strong>', '</b>')
-                        text = re.sub(r"<(\/?[^/bems]).*?>", '', text)
-                        tmp.append(text)
+    # def heading_value_extraction(self,file_name):                       # only for MSD
+    #     tmp = []
+    #     final = {}
+    #     key = ''
+    #     generator = self.text_from_html(file_name)
+    #     paragraphs = [component for component in generator]
+    #     for i, content in enumerate(paragraphs):
+    #         text = str(content)
+    #         if '' in tmp:
+    #             tmp.remove('')
+    #         if re.findall(self.regex_heading_msd, content.text.strip()) or '<li>' in text:
+    #         # if re.findall(self.regex_heading_msd, text):
+    #         #     print(text, '----------super')
+    #             try:
+    #                 if key and (key not in final):
+    #                     if tmp:
+    #                         # final[key] = ['$$'.join(tmp)]
+    #                         yield key , ['$$'.join(tmp)]
+    #                 elif key in final:
+    #                     if tmp:
+    #                         # final[key].append('$$'.join(tmp))
+    #                         yield key ,['$$'.join(tmp)]
+    #                 key = re.sub(r'<.*?>', '', text)
+    #                 # print(key)
+    #                 tmp.clear()
+    #             except:
+    #                 pass
+    #         else:
+    #             if i == len(paragraphs) - 1:
+    #                 text = text.strip()
+    #                 tmp = [t for t in tmp if t]
+    #                 if text and not re.findall(r"Panel\s\d", text):
+    #                     text = text.replace('<strong>', '<b>').replace('</strong>', '</b>')
+    #                     text = re.sub(r"<(\/?[^/bems]).*?>", '', text)
+    #                     tmp.append(text)
+    #                 if key not in final:
+    #                     if tmp:
+    #                         # final[key] = ['$$'.join(tmp)]
+    #                         yield key, ['$$'.join(tmp)]
+    #                 elif key in final:
+    #                     if tmp:
+    #                         # final[key].append('$$'.join(tmp))
+    #                         yield key, ['$$'.join(tmp)]
+    #                 else:
+    #                     pass
+    #             else:
+    #                 text = text.strip()
+    #                 tmp = [t for t in tmp if t]
+    #                 if text and not re.findall(r"Panel\s\d", text):  # filter out heading like 'big panel 1'
+    #                     text = text.replace('<strong>', '<b>').replace('</strong>', '</b>')
+    #                     text = re.sub(r"<(\/?[^/bems]).*?>", '', text)
+    #                     tmp.append(text)
 
     def heading_value_extraction2(self,file_name):
         tmp = []
@@ -191,7 +191,51 @@ class msd_extraction(base):
                             print('fail')
                     if not final[category]:
                         final.pop(category)
+        # return final
 
+
+    def main(self,file_name):
+        final = {}
+        all_lang = set()
+        for key, value in self.heading_value_extraction2(file_name):
+            # prediction = base('msd', msd_model_location).prediction(key,method='labse')['output']
+            prediction = base('msd', msd_model_location).prediction(key)['output']
+            if prediction == 'None':
+                try:
+                    blob = TextBlob(key)
+                    key = blob.translate(to='en')
+                    prediction = base('msd', msd_model_location).prediction(str(key))['output']
+                except:
+                    pass
+            if prediction in msd_categories_lang_exception:
+                val = value[0].replace('$$','<br>')
+                try:
+                    lang = lang_detect(val.translate(str.maketrans("","",string.punctuation)))
+                except:
+                    lang = classify(val.translate(str.maketrans("", "", string.punctuation)))[0]
+                all_lang.add(lang)
+                if prediction in final:
+                    final[prediction].append({lang: str(val)})
+                else:
+                    final[prediction] = [{lang: str(val)}]
+            else:
+                for para in value[0].split('$$'):
+                    try:
+                        lang = lang_detect(para.translate(str.maketrans("","",string.punctuation)))
+                    except:
+                        lang = classify(para.translate(str.maketrans("","",string.punctuation)))[0]
+                    all_lang.add(lang)
+                    if prediction in final:
+                        final[prediction].append({lang: para})
+                    else:
+                        final[prediction] = [{lang: para}]
+        if 'None' in final:
+            final.pop('None', None)
+        final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
+        print('before validation',final)
+        self.validation(final)
+        print('after validation',final)
+        return final
     # def main2(self,file_name):                      # group by language
     #     final = {}
     #     all_lang = set()
@@ -266,48 +310,6 @@ class msd_extraction(base):
     #     final = {**{'status': 1,'language': list(all_lang),'file_name': [file_name]},**final}
     #     self.validation(final)
     #     return final
-
-    def main(self,file_name):
-        final = {}
-        all_lang = set()
-        for key, value in self.heading_value_extraction2(file_name):
-            # prediction = base('msd', msd_model_location).prediction(key,method='labse')['output']
-            prediction = base('msd', msd_model_location).prediction(key)['output']
-            if prediction == 'None':
-                try:
-                    blob = TextBlob(key)
-                    key = blob.translate(to='en')
-                    prediction = base('msd', msd_model_location).prediction(str(key))['output']
-                except:
-                    pass
-            if prediction in msd_categories_lang_exception:
-                val = value[0].replace('$$','<br>')
-                try:
-                    lang = lang_detect(val.translate(str.maketrans("","",string.punctuation)))
-                except:
-                    lang = classify(val.translate(str.maketrans("", "", string.punctuation)))[0]
-                all_lang.add(lang)
-                if prediction in final:
-                    final[prediction].append({lang: str(val)})
-                else:
-                    final[prediction] = [{lang: str(val)}]
-            else:
-                for para in value[0].split('$$'):
-                    try:
-                        lang = lang_detect(para.translate(str.maketrans("","",string.punctuation)))
-                    except:
-                        lang = classify(para.translate(str.maketrans("","",string.punctuation)))[0]
-                    all_lang.add(lang)
-                    if prediction in final:
-                        final[prediction].append({lang: para})
-                    else:
-                        final[prediction] = [{lang: para}]
-        if 'None' in final:
-            final.pop('None', None)
-        final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
-        self.validation(final)
-        print(final)
-        return final
 
     # def main_old(self,file_name):
     #     final = {}
