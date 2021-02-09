@@ -3,7 +3,7 @@
 path_to_bpe_codes = r"/data/Laser/93langs.fcodes"
 path_to_bpe_vocab = r"/data/Laser/93langs.fvocab"
 path_to_encoder = r"/data/Laser/bilstm.93langs.2018-12-26.pt"
-document_location = r"/home/vijay/doc_extractor/model_dataset/"
+document_location = r"/data/testing_files/"
 
 #LaBSE Model
 labse_location = r""

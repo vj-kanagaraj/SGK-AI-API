@@ -7,7 +7,7 @@ class msd_extraction(base):
     def __init__(self):
         super().__init__()
         self.file_name = None
-        self.regex_heading_msd = r"^\d+\.\d?[\-\s]|\<li\>"
+        self.regex_heading_msd = r"^\d+\.\d?[\-\s][^%]|\<li\>"
         self.final = None
         self.validation_categories = {
                                       'warning':['warning'],
@@ -57,6 +57,7 @@ class msd_extraction(base):
                 for column in row.find_all('td'):
                     # print('column----->',column)
                     # yield column.findall('p')
+                    print(f'column---------->{column}')
                     yield column
         else:                                       # for heading - value structure
             print('inside normal structure')
@@ -131,6 +132,7 @@ class msd_extraction(base):
                 if key and tmp:
                     yield key , ["$$".join(tmp)]
                 key = content.text.strip()
+                print(f'key----->{key}')
                 tmp.clear()
             else:
                 if i == len(paragraphs) - 1:
@@ -138,7 +140,7 @@ class msd_extraction(base):
                         try:
                             content = BeautifulSoup(str(content), 'html.parser')
                             for para in content.find_all('p'):
-                                print('para----yyyyyyyyy', para)
+                                # print('para----yyyyyyyyy', para)
                                 para = str(para)
                                 para = para.replace('<strong>', '<b>').replace('</strong>', '</b>')
                                 para = re.sub(r"<(\/?[^/bems]).*?>", '', para)
@@ -154,7 +156,7 @@ class msd_extraction(base):
                             content = BeautifulSoup(str(content),'html.parser')
                             for para in content.find_all('p'):
                                 para = str(para)
-                                print('para----xxxxxxx',para)
+                                # print('para----xxxxxxx',para)
                                 para = para.replace('<strong>', '<b>').replace('</strong>', '</b>')
                                 para = re.sub(r"<(\/?[^/bems]).*?>", '', para)
                                 tmp.append(para)
@@ -229,16 +231,18 @@ class msd_extraction(base):
                         final[prediction].append({lang: para})
                     else:
                         final[prediction] = [{lang: para}]
-        print('final---->',final)
+        # print('final---->',final)
         if 'None' in final:
             final.pop('None', None)
         # self.final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
         self.final = final
-        print('before validation',self.final)
+        # print('before validation',self.final)
         self.validation()
         self.final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **self.final}
-        print('after validation',self.final)
+        # print('after validation',self.final)
         return self.final
+
+
     # def main2(self,file_name):                      # group by language
     #     final = {}
     #     all_lang = set()
