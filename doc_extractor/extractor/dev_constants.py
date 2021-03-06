@@ -55,7 +55,7 @@ excel_data_exclusion = ['None','design instruction','others']
 
 excel_model_location = r"/data/trained_models/excel_model.pkl"
 excel_input_dataset = r"/data/trained_models/Excel_DataSet.xlsx"
-excel_main_dataset = r"/data/trained_models/model_dataset/Excel DataSet.xlsx"
+excel_main_dataset = r"/data/trained_models/Excel DataSet.xlsx"
 
 # Ferrero Model
 
