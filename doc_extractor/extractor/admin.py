@@ -10,7 +10,6 @@ admin.site.site_header = "SGK API ADMIN"
 
 class view_msd_dataset(admin.ModelAdmin):
     list_display = ('text','category','language_code')
-    # list_display = ('text','category','language_code','language','type')
     list_per_page = 30
     # search_fields = ['category',]
     list_filter = ('language_code','category',)
@@ -76,3 +75,16 @@ class undetected_msd_logbook(admin.ModelAdmin):
         return object.language_code
 
 admin.site.register(undetected_msd_log,undetected_msd_logbook)
+
+class view_ferrero_header(admin.ModelAdmin):
+    list_display = ('text','category')
+    list_per_page = 30
+    list_filter = ('category',)
+
+    def text(self, object):
+        return object.text
+
+    def category(self, object):
+        return object.category
+
+admin.site.register(ferrero_header,view_ferrero_header)

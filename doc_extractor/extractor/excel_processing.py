@@ -58,6 +58,14 @@ class base:
             query_result = msd_content.objects.values('category','text')
             _category = [result['category'] for result in query_result]
             _text = [result['text'] for result in query_result]
+        elif self.mode == 'ferrero_header':
+            query_result = ferrero_header.objects.values('category','text')
+            _category = [result['category'] for result in query_result]
+            _text = [result['text'] for result in query_result]
+        elif self.mode == 'general':
+            query_result = general_dataset.objects.values('category','text')
+            _category = [result['category'] for result in query_result]
+            _text = [result['text'] for result in query_result]
         else:
             pass
         if method == 'labse':
@@ -102,10 +110,10 @@ class base:
             pred_output = prediction[0]
         else:
             pred_output = 'None'
-            print(text)
-            print('{}-------------->{}'.format(max(probability[0]), pred_output))
-        # print(text)
-        # print('{}-------------->{}'.format(max(probability[0]), pred_output))
+            # print(text)
+            # print('{}-------------->{}'.format(max(probability[0]), pred_output))
+        print(text)
+        print('{}-------------->{}'.format(max(probability[0]), pred_output))
         return ({'probability': max(probability[0]), 'output': pred_output, 'actual_output': prediction[0]})
 
 class Excel_extraction(base):

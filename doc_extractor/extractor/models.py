@@ -26,3 +26,15 @@ class undetected_msd_log(models.Model):
     category = models.CharField(max_length=50,default='')
     language = models.CharField(max_length=20,blank=True,default='')
 
+# Ferrero
+class ferrero_header(models.Model):
+    text = models.TextField(null=False)
+    category = models.CharField(max_length=50,null=False)
+
+# General
+class general_dataset(models.Model):
+    text = models.TextField(null=False)
+    category = models.CharField(max_length=50,null=False)
+    brand = models.CharField(max_length=50,null=True)
+    domain = models.CharField(max_length=50,null=True)
+

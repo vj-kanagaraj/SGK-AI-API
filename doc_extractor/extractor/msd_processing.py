@@ -158,7 +158,7 @@ class msd_extraction(base):
                 except:
                     pass
             if prediction in msd_categories_lang_exception:
-                val = value[0].replace('$$','<br>')
+                val = value[0].replace('$$', '\n')
                 # val = ' '.join([f"<p>{_val.replace('$$','')}</p>" for _val in value[0].split('$$')])
                 cleaned_text = val.translate(str.maketrans("","",string.punctuation))
                 cleaned_text = re.sub(r'\d','',cleaned_text).lower()

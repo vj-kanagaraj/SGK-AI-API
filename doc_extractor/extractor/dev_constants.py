@@ -51,3 +51,12 @@ msd_categories_lang_exception = ['excipients','active_substance','name','marketi
 excel_data_exclusion = ['None','design instruction','others']
 
 
+# excel_data_model
+
+excel_model_location = r"/data/trained_models/excel_model.pkl"
+excel_input_dataset = r"/data/trained_models/Excel_DataSet.xlsx"
+excel_main_dataset = r"/data/trained_models/model_dataset/Excel DataSet.xlsx"
+
+# Ferrero Model
+
+ferrero_header_model = r"/data/trained_models/ferrero_header_model.pkl"
