@@ -70,7 +70,7 @@ def excel_extraction_new(filepath, sheetname):
     df1 = df1.apply(lambda x: x.astype(str))
     list2 = df1.values.tolist()
     list2 = [
-        [x.replace('N/A', 'n/a').replace('N/a', 'n/a').replace('n/A', 'n/a').replace('NA', 'n/a').replace('\xa0', ' ')
+        [str(x).replace('N/A', 'n/a').replace('N/a', 'n/a').replace('n/A', 'n/a').replace('NA', 'n/a').replace('\xa0', ' ')
          for x in i] for i in list2]
 
     empty = []
@@ -292,7 +292,7 @@ def excel_extraction_new(filepath, sheetname):
                     attributes.append(cell.value)
 
         #         attributes = [x.lower() for x in attributes]
-        attributes = [x.replace('\xa0', ' ') for x in attributes]
+        attributes = [str(x).replace('\xa0', ' ') for x in attributes]
 
         for key, value in new.items():
             for content in value:
