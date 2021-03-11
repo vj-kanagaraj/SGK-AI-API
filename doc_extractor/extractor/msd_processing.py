@@ -17,6 +17,7 @@ class msd_extraction(base):
                                       'expiry_date':['expiry_date'],
                                       'form_content':['form_content'],
                                       'method_route':['method_route'],
+                                      'others': ['others'],
                                       }
 
     def docx_to_html(self,file,method=None):
@@ -186,6 +187,7 @@ class msd_extraction(base):
                         final[prediction] = [{lang: para}]
         # print('final---->',final)
         if 'None' in final:
+            final['unmapped'] = final['None']
             final.pop('None', None)
         # self.final = {**{'status': 1, 'language': list(all_lang), 'file_name': [file_name]}, **final}
         self.final = final

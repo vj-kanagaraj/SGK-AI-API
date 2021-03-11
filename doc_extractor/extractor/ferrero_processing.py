@@ -122,81 +122,165 @@ class ferrero_extraction(base):
             nutrition_check_point = 0
             df = pd.DataFrame(table)
             rows, columns = df.shape
-            if self.is_nutrition_table(re.sub(r'\<(.*?)\>', '', str(df[0][0]))):
+            if self.is_nutrition_table(re.sub(r'\<(.*?)\>', '', str(df[0][0]).replace('\n',' '))):
+                # print(f'nutrition-------->{str(df[0][0])}')
                 nutrition_check_point = 1
             if nutrition_check_point == 1:
                 nutrition_data = {}
+                nutrition_data_original = {}
                 for column in range(columns)[:1]:
                     for row in range(rows):
                         if df[column][row]:
-                            start_nutrition_time = time.perf_counter()
                             # key = nutrition_header_similarity(df[column][row])
                             nutrition_header = df[column][row]
-                            nutrition_header_cleaned = nutrition_header.split('/')[0]
+                            nutrition_header_cleaned = nutrition_header.split('/')[0].strip()
                             key = base('ferrero_header',ferrero_header_model).prediction(nutrition_header_cleaned)['output']
-                            stop_nutrition_time = time.perf_counter()
-                            print(f'the time taken for nutrition similarity --->{stop_nutrition_time - start_nutrition_time}')
-                            if key not in ['None','nutrition_table_reference']:
+                            if key in ['nutrition_table_reference']:
+                                lang = classify(nutrition_header)[0]
+                                final['nutrition_table_contents'] = [{lang:df[column][row]}]
+                            elif key in ['header']:
+                                for col_index in range(columns)[1:]:
+                                    if df[col_index][row]:
+                                        if df[col_index][row].strip() == 'Unit of Measure':
+                                            for col_head in range(columns)[1:]:
+                                                if df[col_head][row]:
+                                                    print('headers---->', df[col_head][row].strip())
+                                                    # if df[col_head][row].strip() not in ['N', 'GC', 'P', 'Y'] and df[col_head][row + 1]:
+                                                    if df[col_head][row].strip():
+                                                        if df[col_head][row].strip() == 'Unit of Measure':
+                                                            if 'header' in nutrition_data:
+                                                                nutrition_data['header'].append('Unit')
+                                                            else:
+                                                                nutrition_data['header'] = ['Unit']
+                                                        elif '%' in df[col_head][row].strip():
+                                                            if 'header' in nutrition_data:
+                                                                nutrition_data['header'].append('PDV')
+                                                            else:
+                                                                nutrition_data['header'] = ['PDV']
+                                                        else:
+                                                            if 'header' in nutrition_data:
+                                                                nutrition_data['header'].append('Value')
+                                                            else:
+                                                                nutrition_data['header'] = ['Value']
+                            elif key not in ['None','nutrition_table_reference','header']:
+                                print('nutrition_header_cleaned --->',nutrition_header_cleaned)
                                 for col_index in range(columns)[1:]:
                                     if key in nutrition_data:
                                         if df[col_index][row] and df[col_index][row] not in ['N', 'GC', 'P', 'Y']:
                                             nutrition_data[key].append(df[col_index][row])
+                                        elif df[col_index][row] == "":
+                                            nutrition_data[key].append(df[col_index][row])
                                     else:
                                         if df[col_index][row] and df[col_index][row] not in ['N', 'GC', 'P', 'Y']:
                                             nutrition_data[key] = [df[col_index][row]]
-                            elif key in ['nutrition_table_reference']:
-                                lang = classify(nutrition_header)[0]
-                                final['nutrition_table_contents'] = [{lang:df[column][row]}]
+                                        elif df[col_index][row] == "":
+                                            nutrition_data[key] = [df[col_index][row]]
+                                            # --------------------------------------------
+                                    if nutrition_header_cleaned in nutrition_data_original:    # for exception  ---- nutrition_data_original
+                                        if df[col_index][row] and df[col_index][row] not in ['N', 'GC', 'P', 'Y']:
+                                            nutrition_data_original[nutrition_header_cleaned].append(df[col_index][row])
+                                        elif df[col_index][row] == "":
+                                            nutrition_data_original[nutrition_header_cleaned].append(df[col_index][row])
+                                    else:
+                                        if df[col_index][row] and df[col_index][row] not in ['N', 'GC', 'P', 'Y']:
+                                            nutrition_data_original[nutrition_header_cleaned] = [df[col_index][row]]
+                                        elif df[col_index][row] == "":
+                                            nutrition_data_original[nutrition_header_cleaned] = [df[col_index][row]]
+                                            # --------------------------------------------
                             else:
                                 pass
                         else:
                             for col_index in range(columns)[1:]:
                                 if df[col_index][row]:
-                                    if df[col_index][row].strip() == 'Nutritional Table Title:':
+                                    print('table title---->',df[col_index][row])
+                                    if df[col_index][row].strip() == 'Unit of Measure':
+                                        for col_head in range(columns)[1:]:
+                                            if df[col_head][row]:
+                                                print('headers---->', df[col_head][row].strip())
+                                                # if df[col_head][row].strip() not in ['N', 'GC', 'P', 'Y'] and df[col_head][row+1]:
+                                                if df[col_head][row].strip():
+                                                    if df[col_head][row].strip() == 'Unit of Measure':
+                                                        if 'header' in nutrition_data:
+                                                            nutrition_data['header'].append('Unit')
+                                                        else:
+                                                            nutrition_data['header'] = ['Unit']
+                                                    elif '%' in df[col_head][row].strip():
+                                                        if 'header' in nutrition_data:
+                                                            nutrition_data['header'].append('PDV')
+                                                        else:
+                                                            nutrition_data['header'] = ['PDV']
+                                                    else:
+                                                        if 'header' in nutrition_data:
+                                                            nutrition_data['header'].append('Value')
+                                                        else:
+                                                            nutrition_data['header'] = ['Value']
+
+                                        continue
+                                    elif df[col_index][row].strip() == 'Nutritional Table Title:':
                                         if df[col_index+1][row]:
                                             lang = classify(df[col_index+1][row])[0]
                                             final['nutrition_table_title'] = [{lang:df[col_index+1][row]}]
-                                    elif df[col_index][row].strip() and df[col_index][row].strip() == 'Servings Per Package:':
+                                            continue
+                                    # elif df[col_index][row].strip() and df[col_index][row].strip() == 'Servings Per Package:':
+                                    elif df[col_index][row].strip() == 'Servings Per Package:':
+                                        print('inside serving per package-->',df[col_index + 1][row])
                                         if df[col_index+1][row]:
-                                            lang = classify(df[col_index + 1][row])[0]
+                                            lang = classify(df[col_index+1][row])[0]
                                             final['serving per package'] = [{lang:df[col_index+1][row]}]
-                                    elif df[col_index][row].strip() and df[col_index][row].strip() == "Serving Size:":
+                                        elif df[col_index+2][row]:
+                                            lang = classify(df[col_index+2][row])[0]
+                                            final['serving size'] = [{lang:df[col_index+2][row]}]
+                                        continue
+                                    # elif df[col_index][row].strip() and df[col_index][row].strip() == "Serving Size:":
+                                    elif df[col_index][row].strip() == 'Serving Size:':
+                                        print('inside serving size-->', df[col_index + 1][row])
                                         if df[col_index+1][row]:
-                                            lang = classify(df[col_index + 1][row])[0]
+                                            lang = classify(df[col_index+1][row])[0]
                                             final['serving size'] = [{lang:df[col_index+1][row]}]
+                                        elif df[col_index+2][row]:
+                                            lang = classify(df[col_index+2][row])[0]
+                                            final['serving size'] = [{lang:df[col_index+2][row]}]
+                                        continue
                                     else:
                                         pass
                 final_nutrition = {}
                 headings = None
                 if nutrition_data['header']:
                     headings = nutrition_data['header']
+                    print('headings--->',headings)
                     try:
                         nutrition_data.pop('header')
                     except:
                         pass
-                for header, nutri_value in nutrition_data.items():
-                    if header != 'None':
-                        for index, value in enumerate(nutri_value):
-                            if header in final_nutrition:
-                                final_nutrition[header].append({headings[index]: {'en': value}})
-                            else:
-                                final_nutrition[header] = [{headings[index]: {'en': value}}]
-                final['Nutrition'] = final_nutrition
+                print('nutrition_data---->', nutrition_data_original)
+                try:
+                    for nutritient, nutri_value in nutrition_data.items():
+                        if nutritient != 'None':
+                            for index, value in enumerate(nutri_value):
+                                if value:
+                                    if nutritient in final_nutrition:
+                                        final_nutrition[nutritient].append({headings[index]: {'en': value}})
+                                    else:
+                                        final_nutrition[nutritient] = [{headings[index]: {'en': value}}]
+                    final['Nutrition'] = final_nutrition
+                except:
+                    for nutritient, nutri_value in nutrition_data_original.items():
+                        if nutritient != 'None':
+                            for index, value in enumerate(nutri_value):
+                                if value:
+                                    if nutritient in final_nutrition:
+                                        final_nutrition[nutritient].append({headings[index]: {'en': value}})
+                                    else:
+                                        final_nutrition[nutritient] = [{headings[index]: {'en': value}}]
+                    final['Nutrition'] = final_nutrition
             else:
                 for column in range(columns)[:1]:
                     for row in range(rows):
                         if df[column][row]:
                             text = re.sub(r'\((.*?)\)|\[.*?\]|\<(.*?)\>', '', df[column][row].replace('\n', '')).strip()
-                            start_header_time = time.perf_counter()
-                            # cate = header_similarity(text)
-                            print('text')
                             cate_out = base('ferrero_header',ferrero_header_model).prediction(text)
                             cate = cate_out['output']
                             cate_probability = cate_out['probability']
-                            print(f'{cate}---------->{cate_probability}')
-                            stop_header_time = time.perf_counter()
-                            print(f'time taken for header similarity----->{stop_header_time - start_header_time}')
-                            # print(cate)
                             if cate not in ['None','header','distributor','manufacturer'] and cate_probability > 0.90:
                                 for col_index in range(columns)[1:]:
                                     if df[col_index][row] and df[col_index][row] not in ['N', 'GC', 'P', 'Y']:
@@ -205,22 +289,15 @@ class ferrero_extraction(base):
                                             lang = TextBlob(cleaned_text).detect_language()
                                         except:
                                             lang = classify(cleaned_text)[0]
-                                        # start_attr_time = time.perf_counter()
                                         text_with_attr = self.attribute_checking(input_pdf, cleaned_text)
-                                        # stop_sttr_time = time.perf_counter()
-                                        # print(f'time taken for attr checking----->{stop_sttr_time-start_attr_time}')
                                         if text_with_attr:
                                             text_final = text_with_attr
                                         else:
                                             text_final = df[col_index][row]
                                         if cate in ['storage instruction', 'ingredients', 'marketing claim']:
-                                            # start_classifier_time = time.perf_counter()
-                                            # pred, probability = general_classifier(cleaned_text)
                                             pred_out = base('general', model_location).prediction(cleaned_text)
                                             pred = pred_out['output']
                                             probability = pred_out['probability']
-                                            # stop_classifier_time = time.perf_counter()
-                                            # print(f'time taken for classifier----->{stop_classifier_time - start_classifier_time}')
                                             if pred != cate:
                                                 if probability > 0.80:
                                                     if pred in final:
@@ -229,18 +306,12 @@ class ferrero_extraction(base):
                                                         final[cate] = [{lang: text_final}]
                                                 else:
                                                     pass
-                                        # lang = lang_detect(re.sub(r'\<(.*?)\>','',str(df[col_index][row])))
                                         if cate in final:
                                             final[cate].append({lang: text_final})
                                         else:
                                             final[cate] = [{lang: text_final}]
                             else:
                                 pass
-        # try:
-        #     self.input_file.close()
-        #     self.output_io.close()
-        # except:
-        #     pass
         return final
 
     def main(self,files,pages):

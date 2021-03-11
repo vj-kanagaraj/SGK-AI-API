@@ -105,7 +105,7 @@ class base:
         probability[0].sort()
         # print(probability)
         max_probability = max(probability[0])
-        if (max_probability > 0.65) or ((max_probability-max_probability/2) > probability[0][-2]):
+        if (max_probability > 0.65) or ((max_probability/2) > probability[0][-2]):
         # if (max_probability > 0.80):
             pred_output = prediction[0]
         else:
