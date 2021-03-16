@@ -46,7 +46,7 @@ class msd_extraction(base):
     def text_from_html(self,file_name):             # only for MSD
         print('entering text to _html')
         html = self.docx_to_html(file_name)
-        print('html---->',html)
+        # print('html---->',html)
         soup = BeautifulSoup(html, 'html.parser')
         '''paragraphs = soup.find_all(['p', 'li'])
         for para in paragraphs:
@@ -59,7 +59,7 @@ class msd_extraction(base):
                 for column in row.find_all('td'):
                     # print('column----->',column)
                     # yield column.findall('p')
-                    print(f'column---------->{column}')
+                    # print(f'column---------->{column}')
                     yield column
         else:                                       # for heading - value structure
             print('inside normal structure')
@@ -81,7 +81,7 @@ class msd_extraction(base):
                 if key and tmp:
                     yield key , ["$$".join(tmp)]
                 key = content.text.strip()
-                print(f'key----->{key}')
+                # print(f'key----->{key}')
                 tmp.clear()
             else:
                 if i == len(paragraphs) - 1:
@@ -161,12 +161,20 @@ class msd_extraction(base):
             if prediction in msd_categories_lang_exception:
                 val = value[0].replace('$$', '\n')
                 # val = ' '.join([f"<p>{_val.replace('$$','')}</p>" for _val in value[0].split('$$')])
-                cleaned_text = val.translate(str.maketrans("","",string.punctuation))
-                cleaned_text = re.sub(r'\d','',cleaned_text).lower()
+                # cleaned_text = val.translate(str.maketrans("","",string.punctuation))
+                # cleaned_text = re.sub(r'\d','',cleaned_text).lower()
+                cleaned_text = re.sub(r'\d','',val).lower()
+                cleaned_text = cleaned_text.replace('\n', ' ').replace(':', '').strip()
+                print(cleaned_text)
                 try:
                     lang = lang_detect(cleaned_text)
+                    print(f'lang_detect------>{cleaned_text} ------>{lang}')
+                    # lang_blob = TextBlob(cleaned_text)
+                    # lang1 = lang_blob.detect_language()
+                    # print(f'textblob---->{cleaned_text} ------>{lang1}')
                 except:
                     lang = classify(cleaned_text)[0]
+                    print(f'classify---->{cleaned_text} ------>{lang}')
                 all_lang.add(lang)
                 if prediction in final:
                     final[prediction].append({lang: str(val)})
@@ -174,12 +182,19 @@ class msd_extraction(base):
                     final[prediction] = [{lang: str(val)}]
             else:
                 for para in value[0].split('$$'):
-                    cleaned_text = para.translate(str.maketrans("", "", string.punctuation))
-                    cleaned_text = re.sub(r'\d', '', cleaned_text).lower()
+                    # cleaned_text = para.translate(str.maketrans("", "", string.punctuation))
+                    # cleaned_text = re.sub(r'\d', '', cleaned_text).lower()
+                    cleaned_text = re.sub(r'\d', '', para).lower()
+                    cleaned_text = cleaned_text.replace('\n',' ').replace(':','').strip()
                     try:
                         lang = lang_detect(cleaned_text)
+                        print(f'lang_detect------>{cleaned_text} ------>{lang}')
+                        # lang_blob = TextBlob(cleaned_text)
+                        # lang1 = lang_blob.detect_language()
+                        # print(f'textblob---->{cleaned_text} ------>{lang1}')
                     except:
                         lang = classify(cleaned_text)[0]
+                        print(f'classify---->{cleaned_text} ------>{lang}')
                     all_lang.add(lang)
                     if prediction in final:
                         final[prediction].append({lang: para})
