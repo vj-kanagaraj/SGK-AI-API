@@ -88,3 +88,22 @@ class view_ferrero_header(admin.ModelAdmin):
         return object.category
 
 admin.site.register(ferrero_header,view_ferrero_header)
+
+class view_general_dataset(admin.ModelAdmin):
+    list_display = ('text','category')
+    list_per_page = 30
+    list_filter = ('category',)
+
+    def text(self, object):
+        return object.text
+
+    def category(self, object):
+        return object.category
+
+    def brand(self, object):
+        return object.brand
+
+    def domain(self, object):
+        return object.domain
+
+admin.site.register(general_dataset,view_general_dataset)
