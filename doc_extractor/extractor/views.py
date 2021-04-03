@@ -14,6 +14,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 # from .excel_processing import *
 from .msd_processing import *
 from .ferrero_processing import *
+from .DG_processing import *
 from .GFS_excel_processing import *
 
 # @api_view()
@@ -60,6 +61,24 @@ def ferrero(request):
         ferrero_final = {'status':0,'comment':'please provide correct query strings'}
     return JsonResponse(ferrero_final)
 
+def dollar_general(request):
+    files = request.GET.getlist('file',None)
+    pages = request.GET.getlist('pages',None)
+    final = {}
+    results = []
+    if len(files) == len(pages):
+        for index,file in enumerate(files):
+            dg = Dollar_General()
+            results.append(dg.main(file,pages[index]))
+
+        for index,result in enumerate(results):
+            final[files[index]] = result
+
+    else:
+        final = {'status':0,'comment':'Please provide proper query strings'}
+    print(final)
+    return JsonResponse(final)
+
 def excel_extraction(request):
     output_files = {}
     files = request.GET.getlist('file',None)
@@ -72,10 +91,6 @@ def excel_extraction(request):
             doc_format = os.path.splitext(file)[1].lower()
             if doc_format == '.xlsx' and sheet:
                 output = excel_extraction_new(file,sheetname=sheet)
-                if output.get('status',None) == 0:
-                    continue
-                else:
-                    pass
             else:
                 output = {'status':0}
             output_sheets[sheet] = output

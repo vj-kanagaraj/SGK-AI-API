@@ -13,6 +13,7 @@ urlpatterns = [
     re_path(r"msd\/$", views.msd, name='msd'),
     re_path(r"ferrero\/$", views.ferrero, name='ferrero'),
     re_path(r"excel_extraction\/$", views.excel_extraction, name='excel_extraction'),
+    re_path(r"dg\/$", views.dollar_general, name='dollar_general'),
     re_path(r"lang_detect\/$",views.language_detection,name='lang_detect'),
     re_path(r"api_token\/$",obtain_auth_token,name='auth_token'),
     # re_path(r"dataset_update\/$",views.dataset_to_mangodb,name='dataset_update'),

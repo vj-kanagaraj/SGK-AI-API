@@ -54,9 +54,15 @@ excel_data_exclusion = ['None','design instruction','others']
 # excel_data_model
 
 excel_model_location = r"/data/trained_models/excel_model.pkl"
+excel_model_location_new = r"/data/trained_models/finalized_model.sav"
 excel_input_dataset = r"/data/trained_models/Excel_DataSet.xlsx"
 excel_main_dataset = r"/data/trained_models/Excel DataSet.xlsx"
 
 # Ferrero Model
 
 ferrero_header_model = r"/data/trained_models/ferrero_header_model.pkl"
+
+# Nestle Model
+
+nestle_model_location = r"/data/trained_models/Nestle_model.pkl"
+nestle_model_dataset = r"/data/trained_models/Nestle_dataset.xlsx"
