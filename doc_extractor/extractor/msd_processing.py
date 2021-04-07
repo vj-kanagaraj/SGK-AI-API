@@ -7,7 +7,7 @@ class msd_extraction(base):
     def __init__(self):
         super().__init__()
         self.file_name = None
-        self.regex_heading_msd = r"^\d+\.\d?[\-\s][^%]|\<li\>"
+        self.regex_heading_msd = r"^\d+\.\d?[\-\s][^%ml]|\<li\>"
         self.final = None
         self.validation_categories = {
                                       'warning':['warning'],
