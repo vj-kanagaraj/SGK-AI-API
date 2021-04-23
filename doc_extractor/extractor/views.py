@@ -48,11 +48,10 @@ def ferrero(request):
     print(f'pages---------->{pages}')
     if len(files) == len(pages):
         for index , file in enumerate(files):
-            if file.startswith('\\'):
-                pass
-            else:
-                file = document_location + file
-
+            # if file.startswith('\\'):
+            #     pass
+            # else:
+            #     file = document_location + file
             doc_format = os.path.splitext(file)[1].lower()
             if doc_format == '.pdf' and pages:
                 out = ferrero_extraction().main(file,pages[index])
