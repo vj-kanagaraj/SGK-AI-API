@@ -52,7 +52,7 @@ class msd_extraction(base):
         for para in paragraphs:
             if '<em>' not in str(para):
                 yield para'''
-        if '<table>' in html and '<em>' in html:                         # for table structure
+        if ('<table>' in html) and ('<em>' in html) and all([len(_row.find_all('td')) != 1 for _row in soup.find_all('tr')]):                         # for table structure
             print('inside table structure')
             rows = soup.find_all('tr')
             for row in rows:
