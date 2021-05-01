@@ -58,6 +58,10 @@ excel_model_location_new = r"/data/trained_models/finalized_model.sav"
 excel_input_dataset = r"/data/trained_models/Excel_DataSet.xlsx"
 excel_main_dataset = r"/data/trained_models/Excel DataSet.xlsx"
 
+# kellogs Model
+
+kelloggs_model = r'/data/trained_models/kelloggs_model.sav'
+
 # Ferrero Model
 
 ferrero_header_model = r"/data/trained_models/ferrero_header_model.pkl"

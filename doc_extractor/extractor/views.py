@@ -16,6 +16,7 @@ from .msd_processing import *
 from .ferrero_processing import *
 from .DG_processing import *
 from .GFS_excel_processing import *
+from .kellogs_extraction import *
 
 # @api_view()
 # @permission_classes([IsAuthenticated])
@@ -93,6 +94,28 @@ def excel_extraction(request):
             else:
                 output = {'status':0}
             output_sheets[sheet] = output
+        output_files[file] = output_sheets
+    return JsonResponse(output_files)
+
+def kelloggs_extraction(request):
+    output_files = {}
+    files = request.GET.getlist('file',None)
+    sheet_names = request.GET.getlist('sheet',None)
+    print(f'file-------->{files}')
+    print(f'sheet_name-------->{sheet_names}')
+    for index , file in enumerate(files):
+        output_sheets = {}
+        for sheet in sheet_names[index].split(','):
+            doc_format = os.path.splitext(file)[1].lower()
+            if doc_format == '.xlsx' and sheet:
+                output = excel_extract_kelloggs(file,sheetname=sheet)
+            else:
+                output = {'status':0}
+            output_sheets[sheet] = output
+        # try:
+        #     log_book(accounts='Kellogs Excel', input_file=file, input_body={}, output=output_sheets).save()
+        # except:
+        #     pass
         output_files[file] = output_sheets
     return JsonResponse(output_files)
 
