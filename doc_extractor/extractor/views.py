@@ -10,6 +10,10 @@ from rest_framework.decorators import api_view,permission_classes,authentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication , TokenAuthentication
 
+import langdetect as lang_det
+from langdetect import DetectorFactory
+DetectorFactory.seed = 1
+
 # import other class
 # from .excel_processing import *
 from .msd_processing import *
@@ -17,6 +21,10 @@ from .ferrero_processing import *
 from .DG_processing import *
 from .GFS_excel_processing import *
 from .kellogs_extraction import *
+from .Nestle_processing import *
+from .carrefour_excel_processing import excel_extract_carrefour
+from .General_mills_processing import main as gm_main
+from .docx_tag_content_extractor_for_tornado import docx_tag_extractor_for_tornado as docx_ext_tornado
 
 # @api_view()
 # @permission_classes([IsAuthenticated])
@@ -70,10 +78,8 @@ def dollar_general(request):
         for index,file in enumerate(files):
             dg = Dollar_General()
             results.append(dg.main(file,pages[index]))
-
         for index,result in enumerate(results):
             final[files[index]] = result
-
     else:
         final = {'status':0,'comment':'Please provide proper query strings'}
     print(final)
@@ -119,47 +125,118 @@ def kelloggs_extraction(request):
         output_files[file] = output_sheets
     return JsonResponse(output_files)
 
+def nestle(request):
+    files = request.GET.getlist('file',None)
+    pages = request.GET.getlist('pages',None)
+    final = {}
+    results = []
+    if len(files) == len(pages):
+        for index,file in enumerate(files):
+            nestle = Nestle_processing()
+            results.append(nestle.main(file,pages[index]))
+        for index,result in enumerate(results):
+            # try:
+            #     log_book(accounts='Nestle', input_file=files[index], input_body={}, output=result).save()
+            # except:
+            #     pass
+            final[files[index]] = result
+    else:
+        final = {'status':0,'comment':'Please provide proper query strings'}
+    return JsonResponse(final)
+
+def general_mills_hd(request):
+    final = {}
+    files = request.GET.getlist('file',None)
+    for index , file in enumerate(files):
+        doc_format = os.path.splitext(file)[1].lower()
+        if doc_format == '.docx':
+            result = gm_main(file)
+            final[file] = result
+        else:
+            final[file] = {'status':0,'comment':'please check the file format'}
+    return JsonResponse(final)
+
+def carrefour_excel(request):
+    output_files = {}
+    files = request.GET.getlist('file',None)
+    sheet_names = request.GET.getlist('sheet',None)
+    print(f'file-------->{files}')
+    print(f'sheet_name-------->{sheet_names}')
+    for index , file in enumerate(files):
+        output_sheets = {}
+        for sheet in sheet_names[index].split(','):
+            doc_format = os.path.splitext(file)[1].lower()
+            if doc_format == '.xlsx' and sheet:
+                output = excel_extract_carrefour(file,sheetname=sheet)
+            else:
+                output = {'status':0,'comment':'please check the input file format'}
+            output_sheets[sheet] = output
+        # try:
+        #     log_book(accounts='Carrefour Excel', input_file=file, input_body={}, output=output_sheets).save()
+        # except:
+        #     pass
+        output_files[file] = output_sheets
+    return JsonResponse(output_files)
+
 @csrf_exempt
 def language_detection(request):
-    lang , lang_classify = None,None
-    # final_lang = {}
-    lang_list = set()
+    langs = set()
     if request.method == 'GET':
         text_list = request.GET.getlist('text',None)
     else:
         text_list = request.POST.getlist('text',None)
-    if text_list:
-        for text in text_list:
-            for sub_text in re.split(r'\s\/',text):
-                print('-------'*9)
-                print(sub_text)
-                print('-------'*9)
-                cleaned_text = re.sub(r'\d','',sub_text).lower()
-                cleaned_text = re.sub(r'[^\w\s]','',cleaned_text).strip()
-                if cleaned_text:
-                    if len(cleaned_text.split()) > 5:
-                        try:
-                            lang = classify(cleaned_text)[0]
-                            lang_classify = lang_detect(cleaned_text)
-                        except:
-                            lang = classify(cleaned_text)[0]
-                        finally:
-                            if lang and lang_classify:
-                                if lang == 'en' or lang_classify == 'en':
-                                    lang = 'en'
-                                else:
-                                    pass
-                            else:
-                                pass
+    for text in text_list:
+        cleaned_text = text.lower().strip()
+        cleaned_text = re.sub(r"\d",'',cleaned_text)
+        text_array = cleaned_text.split('/')
+        for text in text_array:
+            text = re.sub(r'[^\w\s]', '', text).strip()
+            text = text.replace('\n',' ')
+            if text:
+                lang = None
+                fastext_probability = language_model.predict_pro(text)[0]
+                classify_language = classify(text)[0]
+                langdetect = lang_det.detect_langs(text)
+                print(f'fasttext probability----->{fastext_probability}')
+                print(f'classify probability----->{classify_language}')
+                print(f'lang detect _probability----->{langdetect}')
+                if fastext_probability[1] > 0.70 or fastext_probability[0] in ['en']:
+                    lang = fastext_probability[0]
+                if (classify_language == fastext_probability[0] and fastext_probability[1] > 0.60) or (classify_language == 'en' and fastext_probability[0] == 'en'):
+                    langs.add(classify_language)
+                    continue
+                for language_probability in langdetect:
+                    ld_lang, ld_probability = str(language_probability).split(':')
+                    if str(ld_lang).strip() == 'en':
+                        lang = 'en'
+                        break
+                    if float(ld_probability) > 0.75 or str(ld_lang).strip() == str(fastext_probability[0]).strip():
+                        lang = str(ld_lang)
                     else:
                         try:
-                            print('textblob---detection')
-                            lang = TextBlob(cleaned_text).detect_language()
+                            lang = TextBlob(text).detect_language()
                         except:
-                            lang = classify(cleaned_text)[0]
-                    lang_list.add(lang)
-    lang_final = ','.join(list(lang_list))
-    return HttpResponse(lang_final)
+                            lang = langdetect[0].split(':')[0]
+                langs.add(lang)
+    return HttpResponse(",".join(list(langs)))
+
+def docx_tag_content_extractor_for_tornado(request):
+    files = request.GET.getlist('file',None)
+    tags = request.GET.getlist('tag',None)
+    print(f'filessss------>{files}')
+    print(f'tagsss------>{tags}')
+    result = None
+    for index,file_name in enumerate(files):
+        doc_format = os.path.splitext(file_name)[1].lower()
+        if 'html' in doc_format.lower():
+            doc_type = 'html'
+        elif 'xml' in doc_format.lower():
+            doc_type = 'xml'
+        else:
+            raise NotImplementedError('This module is available for html and xml formats')
+        result = docx_ext_tornado(input_file=file_name,tags=tags[index],input_type=doc_type).extract()
+        print(f'result length------>{len(result)}')
+    return JsonResponse({'output': result})
 
 
 # def dataset_to_mangodb(request):
