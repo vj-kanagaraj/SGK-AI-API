@@ -72,3 +72,8 @@ GM_HD_model_location = r"/data/trained_models/GM_HD_model.pkl"
 
 #carrefour model
 carrefour_model_location = r"/data/trained_models/carrefour_excel_model.sav"
+
+# Griesson model
+griesson_model_location = r"/data/trained_models/Griesson_model.pkl"
+griesson_model_dataset = r"/data/trained_models/Griesson_dataset.xlsx"
+
