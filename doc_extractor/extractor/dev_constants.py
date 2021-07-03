@@ -77,3 +77,17 @@ carrefour_model_location = r"/data/trained_models/carrefour_excel_model.sav"
 griesson_model_location = r"/data/trained_models/Griesson_model.pkl"
 griesson_model_dataset = r"/data/trained_models/Griesson_dataset.xlsx"
 
+#mondelez word model
+mondelez_word_model_location = r"/data/trained_models/mondelez_word_model.sav"
+
+#mondelez pdf model
+mondelez_pdf_general_model_location = r"/data/trained_models/mondelez_general_model.pkl"
+mondelez_pdf_model_location = r"/data/trained_models/mondelez_model.pkl"
+mondelez_dataset = r"/data/trained_models/mondelez_dataset.xlsx"
+
+#Albertson pdf model
+albertson_pdf_model_location = r"/data/trained_models/albertson_model.pkl"
+albertson_pdf_dataset_location = r"/data/trained_models/albertson_dataset.xlsx"
+
+# unilever excel
+# using general dataset

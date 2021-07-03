@@ -20,5 +20,9 @@ urlpatterns = [
     re_path(r"docx_tornado_extractor\/$", views.docx_tag_content_extractor_for_tornado,name='docx_extractor_for_tornado'),
     re_path(r"lang_detect\/$",views.language_detection,name='lang_detect'),
     re_path(r"api_token\/$",obtain_auth_token,name='auth_token'),
+    re_path(r"albertson\/$", views.albertson, name='alertson'),
+    re_path(r"mondelez_word\/$", views.mondelez_word, name='mondelez_word'),
+    re_path(r"mondelez_pdf\/$", views.mondelez_pdf, name='mondelez_pdf'),
+    re_path(r"unilever_excel\/$", views.unilever_excel, name='unilever_excel'),
     # re_path(r"dataset_update\/$",views.dataset_to_mangodb,name='dataset_update'),
     ]

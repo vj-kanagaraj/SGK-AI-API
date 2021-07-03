@@ -25,6 +25,10 @@ from .Nestle_processing import *
 from .carrefour_excel_processing import excel_extract_carrefour
 from .General_mills_processing import main as gm_main
 from .docx_tag_content_extractor_for_tornado import docx_tag_extractor_for_tornado as docx_ext_tornado
+from .albertson_processing import albertson_main
+from .unilever_excel_processing import main as main_unilever
+from .mondelez_pdf_processing import mondelez_pdf as mp
+from .mondelez_word_processing import mondelez_word as mw
 
 # @api_view()
 # @permission_classes([IsAuthenticated])
@@ -237,6 +241,68 @@ def docx_tag_content_extractor_for_tornado(request):
         result = docx_ext_tornado(input_file=file_name,tags=tags[index],input_type=doc_type).extract()
         print(f'result length------>{len(result)}')
     return JsonResponse({'output': result})
+
+def unilever_excel(request):
+    output_files = {}
+    files = request.GET.getlist('file', None)
+    sheet_names = request.GET.getlist('sheet', None)
+    print(f'file-------->{files}')
+    print(f'sheet_name-------->{sheet_names}')
+    for index, file in enumerate(files):
+        output_sheets = {}
+        for sheet in sheet_names[index].split(','):
+            doc_format = os.path.splitext(file)[1].lower()
+            if doc_format == '.xlsx' and sheet:
+                output = main_unilever(file, sheetname=sheet)
+            else:
+                output = {'status': 0, 'comment': 'please check the input file format'}
+            output_sheets[sheet] = output
+        output_files[file] = output_sheets
+    return JsonResponse(output_files)
+
+def mondelez_pdf(request):
+    final = {}
+    files = request.GET.getlist('file',None)
+    pages = request.GET.getlist('pages',None)
+    print(files,pages)
+    if len(files) == len(pages):
+        for index , file in enumerate(files):
+            doc_format = os.path.splitext(file)[1].lower()
+            if doc_format == '.pdf':
+                result = mp().main(input_pdf = file,pages = pages[index])
+                final[file] = result
+            else:
+                final[file] = {'status': 0, 'comment': 'please check the file format'}
+    print(final)
+    return JsonResponse(final)
+
+def mondelez_word(request):
+    final = {}
+    files = request.GET.getlist('file',None)
+    for index , file in enumerate(files):
+        doc_format = os.path.splitext(file)[1].lower()
+        if doc_format == '.docx':
+            result = mw(file)
+            final[file] = result
+        else:
+            final[file] = {'status':0,'comment':'please check the file format'}
+    return JsonResponse(final)
+
+def albertson(request):
+    final = {}
+    files = request.GET.getlist('file',None)
+    pages = request.GET.getlist('pages',None)
+    print(files,pages)
+    if len(files) == len(pages):
+        for index , file in enumerate(files):
+            doc_format = os.path.splitext(file)[1].lower()
+            if doc_format == '.pdf':
+                # albertson = Albertson_processing()
+                result = albertson_main(file,pages[index])
+                final[file] = result
+            else:
+                final[file] = {'status': 0, 'comment': 'please check the file format'}
+    return JsonResponse(final)
 
 
 # def dataset_to_mangodb(request):
