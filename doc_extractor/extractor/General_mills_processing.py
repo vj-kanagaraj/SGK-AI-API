@@ -58,8 +58,7 @@ def docx_to_table(input_file):
             else:
                 if row_values:
                     df = pd.DataFrame(row_values)
-                    # if df.shape[0] < 15:
-                    if df.shape[0] < 10:
+                    if df.shape[0] < 13:
                         print('---' * 10)
                         yield row_values
 
@@ -141,6 +140,7 @@ def text_preprocessing(text):
 #     return output
 
 def is_nutrition_table_or_not(text):
+    text = re.sub(r"\(.*\)","",text).lower()
     table_check = ['nutrition information', 'nutrition information typical values', 'nutrition declaration','Valeurs nutritionnelles moyennes']
     similarity = 0
     if isinstance(text,str):
@@ -193,6 +193,7 @@ def nutrition_table_processing(table:list) -> dict:
     # if 'nutrition information' in str(df[0][0]).lower() and "rdt" in str(df[0][0]).lower():
     if is_nutrition_table_or_not(df[0][0]):
         print('nutrition_table_found')
+        # print(df)
         for column in range(columns)[:1]:
             for row in range(rows):
                 nutrition_original = str(df[column][row])
@@ -240,35 +241,37 @@ def normal_table_processing(table:list) -> dict:
             for row in range(rows):
                 # print(df[column][row])
                 header = str(df[column][row])
-                if re.search(r"^\(.*\)$",header.strip()) and header_memory and header_memory != 'None':
-                    header = header_memory
-                    print(header,'------->',df)
-                header_cleaned = re.sub(r"\(.*\)","",header).strip()
-                normal_detection = partial(GM_header_classifier,GM_HD_model_location,GM_HD_model_dataset)
-                if header_cleaned:
-                    output = normal_detection(get_display(header_cleaned))
-                    output_class = output['output']
-                    header_memory = header
-                    probability = output['probability']
-                    if output_class and probability > 0.90:
+                print('header_memory------>',header_memory)
+                if df[column+1][row]:
+                    if re.search(r"^\(.*\)$",header.strip()) and header_memory and header_memory != 'None':
+                        header = header_memory
+                        print(header,'------->',df)
+                    header_cleaned = re.sub(r"\(.*\)","",header).strip()
+                    normal_detection = partial(GM_header_classifier,GM_HD_model_location,GM_HD_model_dataset)
+                    if header_cleaned:
+                        output = normal_detection(get_display(header_cleaned))
+                        output_class = output['output']
+                        header_memory = header
+                        probability = output['probability']
                         print(f'{header_cleaned}-----{output_class}-------{probability}')
-                        # if output_class == "NET_CONTENT_STATEMENT":
-                        #     print(table)
-                        #     print('----' * 5)
-                        if str(df[column+1][row]).strip():
-                            value = df[column+1][row]
-                            if isinstance(value,str):
-                                value = str(df[column+1][row]).strip()
-                                value = text_cleaning(value).strip()
-                                if value:
-                                    try:
-                                        lang = lang_detect(value)
-                                    except:
-                                        lang = classify(value)[0]
-                                    if output_class in normal_dict:
-                                        normal_dict[output_class].append({lang: value})
-                                    else:
-                                        normal_dict[output_class] = [{lang: value}]
+                        if output_class and probability > 0.90:
+                            # if output_class == "NET_CONTENT_STATEMENT":
+                            #     print(table)
+                            #     print('----' * 5)
+                            if str(df[column+1][row]).strip():
+                                value = df[column+1][row]
+                                if isinstance(value,str):
+                                    value = str(df[column+1][row]).strip()
+                                    value = text_cleaning(value).strip()
+                                    if value:
+                                        try:
+                                            lang = lang_detect(value)
+                                        except:
+                                            lang = classify(value)[0]
+                                        if output_class in normal_dict:
+                                            normal_dict[output_class].append({lang: value})
+                                        else:
+                                            normal_dict[output_class] = [{lang: value}]
     return normal_dict
 
 def main(input_docx):
