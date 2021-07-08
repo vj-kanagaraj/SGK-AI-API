@@ -216,6 +216,7 @@ def nutrition_processing(df):
                 for _col in range(columns)[1:]:
                     value = df[_col][row].strip()
                     if value:
+                        value = value.replace(" ","")
                         value_header = 'PDV' if "%" in value else "Value"
                         if 'added' in header and 'sugars' in header:
                             header = 'added sugar'
@@ -224,10 +225,11 @@ def nutrition_processing(df):
                                 nutrition_dict['serving size'].append(value)
                             else:
                                 nutrition_dict['serving size'] = [value]
-                        if header in nutrition_dict:
-                            nutrition_dict[header].append({value_header:{'en':value}})
-                        else:
-                            nutrition_dict[header] = [{value_header:{'en':value}}]
+                        if re.search(r"\d",value):
+                            if header in nutrition_dict:
+                                nutrition_dict[header].append({value_header:{'en':value}})
+                            else:
+                                nutrition_dict[header] = [{value_header:{'en':value}}]
     return nutrition_dict
 
 def normal_content_processing(df):
@@ -260,10 +262,8 @@ def normal_content_processing(df):
 
 def albertson_classifier(text):
     import os
-    model_location = albertson_pdf_model_location
-    # model_location = "".join((document_location,"albertson_model.pkl"))
-    dataset_location = albertson_pdf_dataset_location
-    # dataset_location = "".join((document_location,"albertson_dataset.xlsx"))
+    model_location = "".join((document_location,"albertson_model.pkl"))
+    dataset_location = "".join((document_location,"albertson_dataset.xlsx"))
     if os.path.exists(model_location):
         classifier = joblib.load(model_location)
     else:
@@ -421,11 +421,11 @@ def albertson_main(file,pages):
                                         content_dict['unmapped'].append({'en':content})
                                     else:
                                         content_dict['unmapped'] = [{'en':content}]
-                            print('****' * 5)
-                            print('unmapped element----->',unmapped_element)
-                            print('content list----->',content_list)
-                            print('plumber content list-------->',plumber_content_list)
-                            print('*******' * 6)
+                            # print('****' * 5)
+                            # print('unmapped element----->',unmapped_element)
+                            # print('content list----->',content_list)
+                            # print('plumber content list-------->',plumber_content_list)
+                            # print('*******' * 6)
 
                         page_dict = {**page_dict, **content_dict}
                     else:
