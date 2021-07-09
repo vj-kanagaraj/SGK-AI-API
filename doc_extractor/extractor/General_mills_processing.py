@@ -319,8 +319,8 @@ def text_cleaning(text):
                      'tbc*','address^','icone vegetarienne.PNG< a >','*only new logo eco emballage in yellow box*','*only new logo eco emballage with following text in yellow box*',
                      'new EU recycling logo.PNG< a >','OR (if lack of space )','NA.bmp< a >','*Note: website already in the Generic English Information',
                     ]
-
-    text = re.sub(r"\^.*\^","",text)
+    text = re.sub(r"\^.*?\^","",text)
+    text = re.sub(r"English Back Translation.*","",text,re.I)
     for text_pattern in unwanted_text:
         # text = re.sub(r"{}".format(text_pattern),'',text)
         text = text.replace(text_pattern,'')
